@@ -1,13 +1,18 @@
 import { useState } from 'react'
-
-import './App.css'
+import Landing from '../components/Landing'
+import '../styles/App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [startQuiz, setStartQuiz] = useState(false)
+
+  function startQuestions(){
+    setStartQuiz(true);
+  }
+
 
   return (
     <>
-
+      {!startQuiz && <Landing handleClick={startQuestions} />}
     </>
   )
 }
