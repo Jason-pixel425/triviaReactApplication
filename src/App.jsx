@@ -5,9 +5,14 @@ import '../styles/App.css'
 function App() {
   const [startQuiz, setStartQuiz] = useState(false)
 
+  function startQuestions(){
+    setStartQuiz(true);
+  }
+
+
   return (
     <>
-      <Landing />
+      {!startQuiz && <Landing handleClick={startQuestions} />}
     </>
   )
 }
