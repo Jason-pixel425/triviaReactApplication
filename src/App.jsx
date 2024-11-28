@@ -3,16 +3,12 @@ import Landing from '../components/Landing'
 import '../styles/App.css'
 
 function App() {
-  const [startQuiz, setStartQuiz] = useState(false)
 
-  function startQuestions(){
-    setStartQuiz(true);
-  }
 
 
   return (
     <>
-      {!startQuiz && <Landing handleClick={startQuestions} />}
+      {<Landing handleClick={startQuestions} />}
     </>
   )
 }
