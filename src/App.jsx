@@ -1,10 +1,24 @@
 import { useState, useEffect } from 'react'
 import Landing from '../components/Landing'
+import Question from '../components/Question'
+import Answers from '../components/Answers'
 import '../styles/App.css'
 
 function App() {
   const [triviaQuestions, setTriviaQuestions] = useState([])
+  const [selectedAnswers, setSelectedAnsers] = useState([])
+  
+  const correctAnswers = triviaQuestions ? triviaQuestions.map(question => question.correct_answer) : ""
+  console.log(correctAnswers)
 
+  function shuffleAnswers(question){
+    const allAnswers = [
+      ...question.incorrect_answers,
+      question.correct_answer
+    ]
+    const answersShuffled = allAnswers.sort((a, b) => 0.5 - Math.random());
+    return answersShuffled
+  } 
 
   function getTriviaQuestions() {
     try{
@@ -12,7 +26,14 @@ function App() {
     .then(resp => resp.json())
     .then(data => {
       console.log(data)
-      setTriviaQuestions(data.results)
+      const dataWithShuffle = data.results.map(question => {
+        return {
+          ...question,
+          shuffledAnswers : shuffleAnswers(question)
+        }
+      })
+      setTriviaQuestions(dataWithShuffle)
+    
     })
     } catch(e){
       console.log(e)
@@ -20,17 +41,29 @@ function App() {
 }
 function getQuestions(){
   return triviaQuestions.map(question => {
-    const answers = question.incorrect_answers.map(answer => {
-      return <button name={question.question}>{answer}</button>
-    })
     return (
       <>
-      <label htmlFor={question.question}>{question.question}</label>
-      {answers}
+        <Question question={question.question} />
+        <div className="answers--container">
+          <Answers handleChange={handleAnswerChange} question={question.question} shuffleAnswers={question.shuffledAnswers}/>
+        </div>
       </>
-      
     )
   })
+}
+
+function handleAnswerChange(question, value) {
+  setSelectedAnsers(prevSelected => {
+    return [
+      ...prevSelected,
+      {
+        question: {question},
+        value: {value}
+      }
+    
+    ]
+  })
+  console.log(selectedAnswers)  
 }
 // {type: 'multiple',
 //   difficulty: 'medium',
@@ -43,8 +76,8 @@ function getQuestions(){
       {triviaQuestions.length === 0 && <Landing handleClick={getTriviaQuestions}/>}
       {triviaQuestions.length > 0 && 
       <form>
-        
         {getQuestions()}
+        <button>submit</button>
       </form>}
     </>
   )
