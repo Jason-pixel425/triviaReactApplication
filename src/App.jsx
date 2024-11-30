@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import parse from 'html-react-parser'
+import { nanoid } from 'nanoid'
 import Landing from '../components/Landing'
 import Question from '../components/Question'
 import Answers from '../components/Answers'
@@ -9,10 +10,12 @@ function App() {
   const [triviaQuestions, setTriviaQuestions] = useState([])
   const [selectedAnswers, setSelectedAnwsers] = useState([])
   
+  const test = nanoid()
+  console.log(test)
 
   // Derived values
-  const correctAnswers = triviaQuestions ? triviaQuestions.map(question => {return {[question.question] : question.correct_answer}}) : ""
-  
+  const correctAnswers = triviaQuestions ? triviaQuestions.map(question => {return {id : question.id, correctAns: question.correct_answer}}) : ""
+  console.log(correctAnswers)  
 
 
   // Get trivia questions from opentdb
@@ -32,13 +35,14 @@ function App() {
         const allAnswers = [...parsedIncorrectAnswers, parsedCorrectAnswer];
          // This is not truly random... but it works for now. Might revist
         const shuffledAnswers = allAnswers.sort(() => 0.5 - Math.random());
-
+        const id = nanoid()
         return {
           ...question,
           question: parsedQuestion,
           correct_answer: parsedCorrectAnswer,
           incorrect_answers: parsedIncorrectAnswers,
           shuffledAnswers: shuffledAnswers,
+          id: id
         }
       })
       setTriviaQuestions(dataWithShuffle)
@@ -54,9 +58,9 @@ function getQuestions(){
   return triviaQuestions.map(question => {
     return (
       <>
-        <Question question={question.question} />
+        <Question key={nanoid()} question={question.question} />
         <div className="answers--container">
-          <Answers handleChange={handleAnswerChange} question={question.question} selectedAnswers={question.question || ''} shuffleAnswers={question.shuffledAnswers}/>
+          <Answers handleChange={handleAnswerChange} id={question.id} question={question.question} selectedAnswers={question.question || ''} shuffleAnswers={question.shuffledAnswers}/>
         </div>
       </>
     )
@@ -68,11 +72,14 @@ function getQuestions(){
 // Unsure if this is needed as of yet. We'll see... 
 //  **Currently NOT implemented**
 // is passed as a prop through...
-function handleAnswerChange(question, answer) {
-  setSelectedAnwsers((prev) => ({
+function handleAnswerChange(id, answer) {
+  setSelectedAnwsers((prev) => (
+    [
     ...prev,
-    [question]: answer, 
-  }));
+    { id: id,
+      selectedAnswer: answer,} 
+  ]
+));
 }
 console.log(selectedAnswers)
 
