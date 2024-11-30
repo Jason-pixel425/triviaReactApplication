@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import parse from 'html-react-parser'
 import Landing from '../components/Landing'
 import Question from '../components/Question'
 import Answers from '../components/Answers'
@@ -25,6 +26,7 @@ function App() {
   } 
 
   // Get trivia questions from opentdb and call shuffleAnswers to add shuffledAnswers to question properties
+  // parse data to usuable strings.
   function getTriviaQuestions() {
     try{
     fetch('https://opentdb.com/api.php?amount=5&type=multiple')
@@ -32,11 +34,16 @@ function App() {
     .then(data => {
       console.log(data)
       const dataWithShuffle = data.results.map(question => {
+        
         return {
           ...question,
+          question: parse(question.question),
+          correct_answer: parse(question.correct_answer),
+          incorrect_answers: question.incorrect_answers.map(incorrect => parse(incorrect)),
           shuffledAnswers : shuffleAnswers(question)
         }
       })
+      console.log(dataWithShuffle)
       setTriviaQuestions(dataWithShuffle)
     
     })
