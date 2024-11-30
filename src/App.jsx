@@ -12,14 +12,14 @@ function App() {
 
   // Derived values
   const correctAnswers = triviaQuestions ? triviaQuestions.map(question => {return {[question.question] : question.correct_answer}}) : ""
-  console.log(correctAnswers)
+  
 
 
-  // Get trivia questions from opentdb and call shuffleAnswers to add shuffledAnswers to question properties
+  // Get trivia questions from opentdb
   // parse data to usuable strings.
   function getTriviaQuestions() {
     try{
-    fetch('https://opentdb.com/api.php?amount=5&type=multiple')
+    fetch('https://opentdb.com/api.php?amount=10&type=multiple')
     .then(resp => resp.json())
     .then(data => {
       const dataWithShuffle = data.results.map(question => {
@@ -63,6 +63,8 @@ function getQuestions(){
   })
 }
 
+
+
 // Unsure if this is needed as of yet. We'll see... 
 //  **Currently NOT implemented**
 // is passed as a prop through...
@@ -72,7 +74,7 @@ function handleAnswerChange(question, answer) {
     [question]: answer, 
   }));
 }
-
+console.log(selectedAnswers)
 
 
   return (
