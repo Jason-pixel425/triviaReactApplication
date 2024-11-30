@@ -8,9 +8,13 @@ function App() {
   const [triviaQuestions, setTriviaQuestions] = useState([])
   const [selectedAnswers, setSelectedAnsers] = useState([])
   
+
+  // Derived values
   const correctAnswers = triviaQuestions ? triviaQuestions.map(question => question.correct_answer) : ""
   console.log(correctAnswers)
 
+
+  // This is not truly random... but it works for now. Might revist
   function shuffleAnswers(question){
     const allAnswers = [
       ...question.incorrect_answers,
@@ -20,6 +24,7 @@ function App() {
     return answersShuffled
   } 
 
+  // Get trivia questions from opentdb and call shuffleAnswers to add shuffledAnswers to question properties
   function getTriviaQuestions() {
     try{
     fetch('https://opentdb.com/api.php?amount=5&type=multiple')
@@ -39,6 +44,8 @@ function App() {
       console.log(e)
     }
 }
+
+//Render questions and answers to page
 function getQuestions(){
   return triviaQuestions.map(question => {
     return (
@@ -52,6 +59,9 @@ function getQuestions(){
   })
 }
 
+// Unsure if this is needed as of yet. We'll see... 
+//  **Currently NOT implemented**
+// is passed as a prop through...
 function handleAnswerChange(question, value) {
   setSelectedAnsers(prevSelected => {
     return [
