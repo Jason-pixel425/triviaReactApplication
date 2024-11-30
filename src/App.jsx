@@ -7,23 +7,13 @@ import '../styles/App.css'
 
 function App() {
   const [triviaQuestions, setTriviaQuestions] = useState([])
-  const [selectedAnswers, setSelectedAnsers] = useState([])
+  const [selectedAnswers, setSelectedAnwsers] = useState([])
   
 
   // Derived values
-  const correctAnswers = triviaQuestions ? triviaQuestions.map(question => question.correct_answer) : ""
+  const correctAnswers = triviaQuestions ? triviaQuestions.map(question => {return {[question.question] : question.correct_answer}}) : ""
   console.log(correctAnswers)
 
-
-  // This is not truly random... but it works for now. Might revist
-  function shuffleAnswers(question){
-    const allAnswers = [
-      ...question.incorrect_answers,
-      question.correct_answer
-    ]
-    const answersShuffled = allAnswers.sort((a, b) => 0.5 - Math.random());
-    return answersShuffled
-  } 
 
   // Get trivia questions from opentdb and call shuffleAnswers to add shuffledAnswers to question properties
   // parse data to usuable strings.
@@ -32,18 +22,25 @@ function App() {
     fetch('https://opentdb.com/api.php?amount=5&type=multiple')
     .then(resp => resp.json())
     .then(data => {
-      console.log(data)
       const dataWithShuffle = data.results.map(question => {
-        
+        // Parse the question and answers
+        const parsedQuestion = parse(question.question);
+        const parsedCorrectAnswer = parse(question.correct_answer);
+        const parsedIncorrectAnswers = question.incorrect_answers.map(incorrect => parse(incorrect));
+
+        // Shuffle the parsed answers
+        const allAnswers = [...parsedIncorrectAnswers, parsedCorrectAnswer];
+         // This is not truly random... but it works for now. Might revist
+        const shuffledAnswers = allAnswers.sort(() => 0.5 - Math.random());
+
         return {
           ...question,
-          question: parse(question.question),
-          correct_answer: parse(question.correct_answer),
-          incorrect_answers: question.incorrect_answers.map(incorrect => parse(incorrect)),
-          shuffledAnswers : shuffleAnswers(question)
+          question: parsedQuestion,
+          correct_answer: parsedCorrectAnswer,
+          incorrect_answers: parsedIncorrectAnswers,
+          shuffledAnswers: shuffledAnswers,
         }
       })
-      console.log(dataWithShuffle)
       setTriviaQuestions(dataWithShuffle)
     
     })
@@ -59,7 +56,7 @@ function getQuestions(){
       <>
         <Question question={question.question} />
         <div className="answers--container">
-          <Answers handleChange={handleAnswerChange} question={question.question} shuffleAnswers={question.shuffledAnswers}/>
+          <Answers handleChange={handleAnswerChange} question={question.question} selectedAnswers={question.question || ''} shuffleAnswers={question.shuffledAnswers}/>
         </div>
       </>
     )
@@ -69,24 +66,14 @@ function getQuestions(){
 // Unsure if this is needed as of yet. We'll see... 
 //  **Currently NOT implemented**
 // is passed as a prop through...
-function handleAnswerChange(question, value) {
-  setSelectedAnsers(prevSelected => {
-    return [
-      ...prevSelected,
-      {
-        question: {question},
-        value: {value}
-      }
-    
-    ]
-  })
-  console.log(selectedAnswers)  
+function handleAnswerChange(question, answer) {
+  setSelectedAnwsers((prev) => ({
+    ...prev,
+    [question]: answer, 
+  }));
 }
-// {type: 'multiple',
-//   difficulty: 'medium',
-//   category: 'Sports',
-//   question: 'Who won the 2015 College Football Playoff (CFP) National Championship? ',
-//   correct_answer: 'Ohio State Buckeyes'}
+
+
 
   return (
     <>
