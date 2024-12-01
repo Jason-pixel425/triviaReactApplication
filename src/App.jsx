@@ -9,14 +9,19 @@ import '../styles/App.css'
 function App() {
   const [triviaQuestions, setTriviaQuestions] = useState([])
   const [selectedAnswers, setSelectedAnwsers] = useState([])
+  const [quizOver, setQuizOver] = useState(false)
   
-  const test = nanoid()
-  console.log(test)
+
 
   // Derived values
-  const correctAnswers = triviaQuestions ? triviaQuestions.map(question => {return {id : question.id, correctAns: question.correct_answer}}) : ""
+  const correctAnswers = triviaQuestions ? triviaQuestions.map(question => {return {id : question.id, correct: question.correct_answer}}) : ""
+  const isAllAnswered = selectedAnswers.length === correctAnswers.length
   console.log(correctAnswers)  
 
+  function getNumOfCorrect() {
+    const result =  selectedAnswers.filter(answer => correctAnswers.some(correctAn => correctAn.id === answer.id ? correctAn.correct === answer.selectedAnswer : false))
+    return result
+  }
 
   // Get trivia questions from opentdb
   // parse data to usuable strings.
@@ -67,30 +72,28 @@ function getQuestions(){
   })
 }
 
+// pass the is gameOver prop to answers component and use clsx to conditionally add classes to correct, incorrect and neutral (becuase of gamestate change)
+// Easiest way I can think of is to make a state tracking if quiz is submitted
 
 
-// Unsure if this is needed as of yet. We'll see... 
-//  **Currently NOT implemented**
-// is passed as a prop through...
 function handleAnswerChange(id, answer) {
-  setSelectedAnwsers((prev) => (
-    [
-    ...prev,
-    { id: id,
-      selectedAnswer: answer,} 
-  ]
-));
+  setSelectedAnwsers((prev) => {
+    const updatedArr = prev.map(ans => {
+      return ans.id === id ? {id: id, selectedAnswer: answer} : ans
+    })
+    const checkIfUpdated = updatedArr.some(ans => ans.id === id)
+    return checkIfUpdated ? updatedArr : [...updatedArr, { id, selectedAnswer: answer }];
+  });
 }
+
 console.log(selectedAnswers)
-
-
   return (
     <>
       {triviaQuestions.length === 0 && <Landing handleClick={getTriviaQuestions}/>}
       {triviaQuestions.length > 0 && 
       <form>
         {getQuestions()}
-        <button>submit</button>
+        {isAllAnswered && !quizOver ? <button>submit</button> : null}
       </form>}
     </>
   )
