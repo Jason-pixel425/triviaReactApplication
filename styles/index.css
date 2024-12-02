@@ -4,10 +4,11 @@
 
 
 body {
+  font-family: 'Inter', serif;
   position: relative;
   margin: 0;
-  padding: 0;
-  height: 100vh;
+  padding-block: 2em;
+  min-height: 100vh;
   background-color: #F5F7FB;
 }
 
@@ -16,13 +17,18 @@ body {
   width: 100%;
 }
 
+.blue-blob, .yellow-blob{
+  z-index: -1;
+}
+
 .blue-blob{
-  position: absolute;
+  position: fixed;
   bottom: 0;
 }
 
 .yellow-blob{
   position: absolute;
   right: 0;
+  top: -1em;
 }
 
