@@ -12,24 +12,26 @@ function App() {
   const [selectedAnswers, setSelectedAnwsers] = useState([])
   const [quizOver, setQuizOver] = useState(false)
   const formRef = useRef(null)
+  const submitRef = useRef(null)
   
 
 
-  // Derived values
+  // Derived valuess
   const correctAnswers = triviaQuestions ? triviaQuestions.map(question => {return {id : question.id, correct: question.correct_answer}}) : ""
   const isAllAnswered = selectedAnswers.length === correctAnswers.length
   const selectedCorrectAnsArr =  selectedAnswers.filter(answer => 
     correctAnswers.some(correctAn => correctAn.id === answer.id ? correctAn.correct === answer.selectedAnswer : false))
   const numberOfCorrect = selectedCorrectAnsArr.length
   const numberOfQuestions = correctAnswers.length
-  console.log(correctAnswers)
+
+
 
 
   // Get trivia questions from opentdb
   // parse data to usuable strings.
   function getTriviaQuestions() {
     try{
-    fetch('https://opentdb.com/api.php?amount=5&category=27&difficulty=hard&type=multiple')
+    fetch('https://opentdb.com/api.php?amount=10&type=multiple')
     .then(resp => resp.json())
     .then(data => {
       const dataWithShuffle = data.results.map(question => {
@@ -68,7 +70,13 @@ function getQuestions(){
       <>
         <Question key={nanoid()} question={question.question} />
         <div className="answers--container">
-          <Answers handleChange={handleAnswerChange} isQuizOver={quizOver} id={question.id} question={question.question} selectedAnswers={question.question || ''} shuffleAnswers={question.shuffledAnswers}/>
+          <Answers handleChange={handleAnswerChange} 
+            isQuizOver={quizOver} 
+            id={question.id} 
+            selectedAnswers={selectedAnswers} 
+            question={question.question} 
+            correctAnswer={question.correct_answer}  
+            shuffleAnswers={question.shuffledAnswers}/>
           
         </div>
         <hr />
@@ -77,26 +85,22 @@ function getQuestions(){
   })
 }
 
-// pass the is gameOver prop to answers component and use clsx to conditionally add classes to correct, incorrect and neutral (becuase of gamestate change)
-// Easiest way I can think of is to make a state tracking if quiz is submitted
-//pass the correct answer from the api return || check if there is a property for "checked"
 
 function handleSubmit(e) {
   e.preventDefault()
   setQuizOver(true)
-
 }
 
 
 // Reset form, reset states, get new questions.
 function handleNewQuiz() {
-  console.log("hi")
   formRef.current ? formRef.current.reset() : null
   setQuizOver(false)
   getTriviaQuestions()
   setSelectedAnwsers([])
 }
 
+//Handle answer changes
 function handleAnswerChange(id, answer) {
   setSelectedAnwsers((prev) => {
     const updatedArr = prev.map(ans => {
@@ -107,16 +111,26 @@ function handleAnswerChange(id, answer) {
   });
 }
 
-console.log(selectedAnswers)
+// scroll to submit button when appears
+useEffect(() => {
+  if (isAllAnswered && submitRef.current) {
+    submitRef.current.scrollIntoView({ behavior: 'smooth' });
+  }
+}, [isAllAnswered]);
+
+
+
   return (
     <>
       {triviaQuestions.length === 0 && <Landing handleClick={getTriviaQuestions}/>}
       {triviaQuestions.length > 0 && 
       <form ref={formRef} onSubmit={handleSubmit}>
         {getQuestions()}
-        {isAllAnswered && !quizOver  ? <button>submit</button> : null}
+        {isAllAnswered && !quizOver  ? <button ref={submitRef} className="btn--small check">Check answers</button> : null}
       </form>}
-      {quizOver ? <QuizOver numCorrect={numberOfCorrect} handleClick={handleNewQuiz} quizLength={numberOfQuestions} /> : null}
+      {quizOver ? <QuizOver numCorrect={numberOfCorrect} 
+                            handleClick={handleNewQuiz} 
+                            quizLength={numberOfQuestions} /> : null}
 
     </>
   )
